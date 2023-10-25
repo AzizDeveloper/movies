@@ -1,10 +1,10 @@
 package dev.aziz.movies.services;
 
 import dev.aziz.movies.dtos.MovieDto;
+import dev.aziz.movies.dtos.ReducedMovieDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MovieService {
@@ -15,12 +15,20 @@ public class MovieService {
             new MovieDto(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", List.of("Marlon Brando", "Al Pacino", "James Caan", "Richard S. Castellano", "Robert Duvall"), "Crime")
     );
 
-    public List<MovieDto> getMovies() {
-        return movieDtoList;
+    public List<ReducedMovieDto> getMovies() {
+        List<ReducedMovieDto> movieList = movieDtoList.stream()
+                .map(movieDto -> new ReducedMovieDto(
+                        movieDto.getTitle(), movieDto.getYear(), movieDto.getRate()
+                )).toList();
+        return movieList;
     }
 
-    public Optional<MovieDto> findMovieById(Long id) {
-        Optional<MovieDto> first = movieDtoList.stream().filter(movieDto -> movieDto.getId() == id).findFirst();
-        return first;
+    public MovieDto findMovieById(Long id) {
+        MovieDto foundMovie = movieDtoList
+                .stream()
+                .filter(movieDto -> movieDto.getId() == id)
+                .findFirst()
+                .orElseThrow();
+        return foundMovie;
     }
 }

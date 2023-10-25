@@ -4,6 +4,8 @@ import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
 import dev.aziz.movies.services.MovieService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,17 +19,12 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping("/movies")
-    public List<ReducedMovieDto> getAllMovies() {
-        List<MovieDto> movies = movieService.getMovies();
-        List<ReducedMovieDto> reducedMovieDto = movies.stream()
-                .map(movieDto -> new ReducedMovieDto(
-                        movieDto.getTitle(), movieDto.getYear(), movieDto.getRate()
-                )).toList();
-        return reducedMovieDto;
+    public ResponseEntity<List<ReducedMovieDto>> getAllMovies() {
+        return new ResponseEntity<>(movieService.getMovies(), HttpStatus.OK);
     }
 
     @GetMapping("/movies/{id}")
-    public MovieDto getMovie(@PathVariable Long id) {
-        return movieService.findMovieById(id).orElseThrow();
+    public ResponseEntity<MovieDto> getMovie(@PathVariable Long id) {
+        return new ResponseEntity<>(movieService.findMovieById(id), HttpStatus.OK);
     }
 }
