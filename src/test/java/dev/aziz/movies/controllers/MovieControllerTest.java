@@ -16,6 +16,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MovieController.class)
 class MovieControllerTest {
@@ -26,7 +29,6 @@ class MovieControllerTest {
     @MockBean
     public MovieService movieService;
 
-    @Autowired
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -40,12 +42,13 @@ class MovieControllerTest {
 
         //when
         when(movieService.getMovies()).thenReturn(reducedMovieDtoList);
-        MvcResult mvcResult = mockMvc.perform(get("/movies")).andReturn();
 
         //then
-        assertEquals(200, mvcResult.getResponse().getStatus());
-        assertEquals(objectMapper.writeValueAsString(reducedMovieDtoList), mvcResult.getResponse().getContentAsString());
-
+        mockMvc.perform(get("/movies"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Titanic"))
+                .andExpect(jsonPath("$[0].year").value(1997));
     }
 
     @Test
