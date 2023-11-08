@@ -2,7 +2,7 @@ package dev.aziz.movies.services;
 
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
-import dev.aziz.movies.dtos.UpdateDto;
+import dev.aziz.movies.dtos.UpdateMovieDto;
 import dev.aziz.movies.exceptions.AppException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -52,38 +52,40 @@ public class MovieService {
 
     public MovieDto deleteById(Long id) {
         MovieDto movieById = findMovieById(id);
-        if (!movieDtoList.contains(movieById)) {
-            throw new AppException("Movie not found.", HttpStatus.NOT_FOUND);
-        }
         movieDtoList.remove(movieById);
         return movieById;
     }
 
-    public MovieDto updateById(Long id, UpdateDto updateDto) {
+    public MovieDto updateById(Long id, UpdateMovieDto updateMovieDto) {
         MovieDto movieById = findMovieById(id);
-        if (!movieDtoList.contains(movieById)) {
-            throw new AppException("Movie not found.", HttpStatus.NOT_FOUND);
-        }
 
-        if ("".equals(updateDto.getDescription())){
+        if ("".equals(updateMovieDto.getDescription())) {
             throw new AppException("Description must not be empty.", HttpStatus.BAD_REQUEST);
-        }else if (updateDto.getDescription() != null) {
-            movieById.setDescription(updateDto.getDescription());
+        } else if (updateMovieDto.getDescription() != null) {
+            movieById.setDescription(updateMovieDto.getDescription());
         }
 
-        if (updateDto.getRate() != 0) {
-            if (updateDto.getRate() > 0 && updateDto.getRate() <= 5) {
-                movieById.setRate(updateDto.getRate());
-            } else if (updateDto.getRate() < 1 || updateDto.getRate() > 5) {
+        if (updateMovieDto.getRate() != 0) {
+            if (updateMovieDto.getRate() > 0 && updateMovieDto.getRate() <= 5) {
+                movieById.setRate(updateMovieDto.getRate());
+            } else if (updateMovieDto.getRate() < 1 || updateMovieDto.getRate() > 5) {
                 throw new AppException("Rate must not be empty and should be between 1 and 5.", HttpStatus.BAD_REQUEST);
             }
         }
 
-        if ("".equals(updateDto.getGenre())) {
+        if ("".equals(updateMovieDto.getGenre())) {
             throw new AppException("Genre must not be empty.", HttpStatus.BAD_REQUEST);
-        } else if (updateDto.getGenre() != null){
-            movieById.setGenre(updateDto.getGenre());
+        } else if (updateMovieDto.getGenre() != null) {
+            movieById.setGenre(updateMovieDto.getGenre());
         }
+        return movieById;
+    }
+
+    public MovieDto updateFullMovieById(Long id, UpdateMovieDto updateMovieDto) {
+        MovieDto movieById = findMovieById(id);
+        movieById.setDescription(updateMovieDto.getDescription());
+        movieById.setRate(updateMovieDto.getRate());
+        movieById.setGenre(updateMovieDto.getGenre());
         return movieById;
     }
 }

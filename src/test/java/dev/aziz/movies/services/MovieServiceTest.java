@@ -2,7 +2,7 @@ package dev.aziz.movies.services;
 
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
-import dev.aziz.movies.dtos.UpdateDto;
+import dev.aziz.movies.dtos.UpdateMovieDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -92,29 +92,56 @@ class MovieServiceTest {
         ));
 
         // when
-        UpdateDto updateDto1 = UpdateDto
+        UpdateMovieDto updateMovieDto1 = UpdateMovieDto
                 .builder()
                 .description("Just movie")
                 .build();
 
-        UpdateDto updateDto2 = UpdateDto
+        UpdateMovieDto updateMovieDto2 = UpdateMovieDto
                 .builder()
                 .rate(3)
                 .build();
 
-        UpdateDto updateDto3 = UpdateDto
+        UpdateMovieDto updateMovieDto3 = UpdateMovieDto
                 .builder()
                 .genre("Drama")
                 .build();
-        movieService.updateById(1L, updateDto1);
-        movieService.updateById(2L, updateDto2);
-        movieService.updateById(3L, updateDto3);
+        MovieDto movieDto1 = movieService.updateById(1L, updateMovieDto1);
+        MovieDto movieDto2 = movieService.updateById(2L, updateMovieDto2);
+        MovieDto movieDto3 = movieService.updateById(3L, updateMovieDto3);
 
         // then
         assertAll(() -> {
-            assertEquals("Just movie", movieService.getMovieDtoList().get(0).getDescription());
-            assertEquals(3, movieService.getMovieDtoList().get(1).getRate());
-            assertEquals("Drama", movieService.getMovieDtoList().get(2).getGenre());
+            assertEquals("Just movie", movieDto1.getDescription());
+            assertEquals(3, movieDto2.getRate());
+            assertEquals("Drama", movieDto3.getGenre());
+        });
+    }
+
+    @Test
+    void updateFullMovieByIdTest() {
+        // given
+        List<MovieDto> defaultInMemory = new ArrayList<>(Arrays.asList(
+                new MovieDto(1L, "Titanic", "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", List.of("Leonardo DiCaprio", "Kate Winslet", "Billy Zane", "Kathy Bates", "Frances Fisher"), "Drama"),
+                new MovieDto(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", List.of("Tim Robbins", "Morgan Freeman", "Bob Gunton", "William Sandler", "Clancy Brown"), "Drama"),
+                new MovieDto(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", List.of("Marlon Brando", "Al Pacino", "James Caan", "Richard S. Castellano", "Robert Duvall"), "Crime")
+        ));
+
+        // when
+        UpdateMovieDto updateMovieDto1 = UpdateMovieDto
+                .builder()
+                .description("Just movie")
+                .rate(2)
+                .genre("Fantastic")
+                .build();
+
+        MovieDto movieDto = movieService.updateFullMovieById(1L, updateMovieDto1);
+
+        // then
+        assertAll(() -> {
+            assertEquals("Just movie", movieDto.getDescription());
+            assertEquals(2, movieDto.getRate());
+            assertEquals("Fantastic", movieDto.getGenre());
         });
     }
 }

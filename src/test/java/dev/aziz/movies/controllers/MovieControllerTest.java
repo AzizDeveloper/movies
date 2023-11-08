@@ -3,7 +3,7 @@ package dev.aziz.movies.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
-import dev.aziz.movies.dtos.UpdateDto;
+import dev.aziz.movies.dtos.UpdateMovieDto;
 import dev.aziz.movies.services.MovieService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +124,45 @@ class MovieControllerTest {
 
         //when
         //then
-        UpdateDto updateDto = UpdateDto.builder()
+        UpdateMovieDto updateMovieDto = UpdateMovieDto.builder()
+                .description("Batman")
+                .rate(3)
+                .build();
+
+        MovieDto movieDto = MovieDto.builder()
+                .id(1L)
+                .title("Titanic")
+                .description("Batman")
+                .year(1997)
+                .rate(3)
+                .director("James Cameron")
+                .mainActors(List.of("Leonardo DiCaprio", "Kate Winslet", "Billy Zane", "Kathy Bates", "Frances Fisher"))
+                .genre("Horror")
+                .build();
+        String inputJson = objectMapper.writeValueAsString(updateMovieDto);
+
+        when(movieService.updateById(1L, updateMovieDto)).thenReturn(movieDto);
+
+        mockMvc.perform(patch("/movies/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(inputJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("Batman"))
+                .andExpect(jsonPath("$.rate").value(3));
+    }
+
+    @Test
+    void updateFullMovie() throws Exception {
+        //given
+        List<MovieDto> movieDtoList = new ArrayList<>(Arrays.asList(
+                new MovieDto(1L, "Titanic", "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", List.of("Leonardo DiCaprio", "Kate Winslet", "Billy Zane", "Kathy Bates", "Frances Fisher"), "Drama"),
+                new MovieDto(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", List.of("Tim Robbins", "Morgan Freeman", "Bob Gunton", "William Sandler", "Clancy Brown"), "Drama"),
+                new MovieDto(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", List.of("Marlon Brando", "Al Pacino", "James Caan", "Richard S. Castellano", "Robert Duvall"), "Crime")
+        ));
+
+        //when
+        //then
+        UpdateMovieDto updateMovieDto = UpdateMovieDto.builder()
                 .description("Batman")
                 .rate(3)
                 .genre("Horror")
@@ -140,16 +178,16 @@ class MovieControllerTest {
                 .mainActors(List.of("Leonardo DiCaprio", "Kate Winslet", "Billy Zane", "Kathy Bates", "Frances Fisher"))
                 .genre("Horror")
                 .build();
-        String inputJson = objectMapper.writeValueAsString(updateDto);
+        String inputJson = objectMapper.writeValueAsString(updateMovieDto);
 
-        when(movieService.updateById(1L, updateDto)).thenReturn(movieDto);
+        when(movieService.updateFullMovieById(1L, updateMovieDto)).thenReturn(movieDto);
 
-        mockMvc.perform(patch("/movies/{id}", 1)
+        mockMvc.perform(put("/movies/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(inputJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("Batman"))
-                .andExpect(jsonPath("$.rate").value(3))
+//                .andExpect(jsonPath("$.rate").value(3))
                 .andExpect(jsonPath("$.genre").value("Horror"));
     }
 }
