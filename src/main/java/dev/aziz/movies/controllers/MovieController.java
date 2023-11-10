@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -37,7 +38,7 @@ public class MovieController {
 
     @PostMapping("/movies")
     public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid MovieDto movieDto) {
-        return ResponseEntity.created(URI.create("/movies")).body(movieService.createMovie(movieDto));
+        return ResponseEntity.created(URI.create("/movies/" + movieDto.getId())).body(movieService.createMovie(movieDto));
     }
 
     @DeleteMapping("/movies/{id}")
