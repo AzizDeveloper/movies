@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/movie_db
+    username: user_db
+    password: pass_db
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: never
+      platform: postgresql
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    enabled: true

@@ -3,6 +3,7 @@ package dev.aziz.movies.controllers;
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
 import dev.aziz.movies.dtos.UpdateMovieDto;
+import dev.aziz.movies.entities.Movie;
 import dev.aziz.movies.services.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -37,8 +37,8 @@ public class MovieController {
     }
 
     @PostMapping("/movies")
-    public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid MovieDto movieDto) {
-        return ResponseEntity.created(URI.create("/movies/" + movieDto.getId())).body(movieService.createMovie(movieDto));
+    public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid Movie movie) {
+        return ResponseEntity.created(URI.create("/movies/" + movie.getId())).body(movieService.createMovie(movie));
     }
 
     @DeleteMapping("/movies/{id}")
