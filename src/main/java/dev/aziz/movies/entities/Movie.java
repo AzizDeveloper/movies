@@ -1,8 +1,14 @@
-package dev.aziz.movies.dtos;
+package dev.aziz.movies.entities;
 
-import dev.aziz.movies.entities.Actor;
-import dev.aziz.movies.entities.Director;
-import dev.aziz.movies.entities.Genre;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -18,12 +26,15 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
+@Entity
+@Table(name = "movie")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MovieDto {
+public class Movie {
 
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "Title should not be empty")
@@ -43,14 +54,27 @@ public class MovieDto {
     private int rate;
 
     @NotEmpty(message = "Director should not be empty")
+    @ManyToMany
+    @JoinTable(name = "movie_directors",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "director_id"))
     private List<Director> director;
 
 
     @NotEmpty(message = "Main actors list should not be empty")
+    @ManyToMany
+    @JoinTable(name = "movie_main_actors",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "actor_id"))
     private List<Actor> mainActors;
 
-
     @NotEmpty(message = "Genre should not be empty")
+    @ManyToMany
+    @JoinTable(
+            name = "movie_genre",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
     private List<Genre> genres;
 
     @CreatedDate
@@ -58,5 +82,4 @@ public class MovieDto {
 
     @LastModifiedDate
     private Instant lastModifiedDate;
-
 }

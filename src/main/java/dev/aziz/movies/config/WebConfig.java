@@ -18,9 +18,13 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5000")
                         .allowedMethods(HttpMethod.GET.name(),
+                                HttpMethod.OPTIONS.name(),
                                 HttpMethod.POST.name(),
+                                HttpMethod.PUT.name(),
+                                HttpMethod.PATCH.name(),
                                 HttpMethod.DELETE.name())
                         .allowedHeaders(HttpHeaders.CONTENT_TYPE,
+                                HttpHeaders.ACCEPT,
                                 HttpHeaders.AUTHORIZATION);
 
             }

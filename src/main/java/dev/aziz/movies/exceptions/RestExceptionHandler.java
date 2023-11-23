@@ -1,6 +1,8 @@
 package dev.aziz.movies.exceptions;
 
 import dev.aziz.movies.dtos.ErrorDto;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,6 +27,19 @@ public class RestExceptionHandler {
         String message = "";
         for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
             message = message + fieldError.getDefaultMessage() + " | ";
+        }
+
+        return ResponseEntity
+                .badRequest()
+                .body(ErrorDto.builder().message(message).build());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorDto> handleException(ConstraintViolationException exception) {
+        String message = "";
+        for (ConstraintViolation violation : exception.getConstraintViolations()) {
+            message = message + violation.getMessage() + " | ";
         }
 
         return ResponseEntity
