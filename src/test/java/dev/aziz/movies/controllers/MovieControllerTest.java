@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
 import dev.aziz.movies.dtos.UpdateMovieDto;
+import dev.aziz.movies.entities.Actor;
+import dev.aziz.movies.entities.Director;
+import dev.aziz.movies.entities.Genre;
 import dev.aziz.movies.entities.Movie;
 import dev.aziz.movies.mappers.MovieMapper;
-import dev.aziz.movies.mappers.MovieMapperImpl;
 import dev.aziz.movies.services.MovieService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,13 +40,7 @@ class MovieControllerTest {
     @Autowired
     public ObjectMapper objectMapper;
 
-    private static MovieMapper movieMapper;
-
-    @BeforeAll
-    public static void setUp() {
-        movieMapper = new MovieMapperImpl();
-    }
-
+    private static MovieMapper movieMapper = Mappers.getMapper(MovieMapper.class);
 
     @Test
     void getMoviesTest() throws Exception {
@@ -72,9 +69,9 @@ class MovieControllerTest {
     void getMovieTest() throws Exception {
         //given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L, "Frank", "Darabont")), Arrays.asList(new Actor(6L, "Tim", "Robbins"), new Actor(7L, "Morgan", "Freeman"), new Actor(8L, "Bob", "Gunton"), new Actor(9L, "William", "Sandler"), new Actor(10L, "Clancy", "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L, "Francis", "Coppola")), Arrays.asList(new Actor(11L, "Marlon", "Brando"), new Actor(12L, "Al", "Pacino"), new Actor(13L, "James", "Caan"), new Actor(14L, "Richard", "Castellano"), new Actor(15L, "Robert", "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
         //when
         when(movieService.findMovieById(1L)).thenReturn(movieMapper.movieToMovieDto(movieList.get(0)));
@@ -83,19 +80,19 @@ class MovieControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Titanic"))
                 .andExpect(jsonPath("$.producedYear").value("1997"))
-                .andExpect(jsonPath("$.genre").value("Drama"))
-                .andExpect(jsonPath("$.director").value("James Cameron"));
+                .andExpect(jsonPath("$.genres[0].name").value("Drama"))
+                .andExpect(jsonPath("$.director[0].firstName").value("James"));
     }
 
     @Test
     void createMovie() throws Exception {
         //given
-        Movie movie = new Movie(4L, "The Dark Knight", "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.", 2008, 5, "Christopher Nolan", "Christian Bale, Heat Ledger, Aaron Eckhart, Michael Caine, Cillian Murphy", "Action", Instant.now(), Instant.now());
+        Movie movie = new Movie(4L, "The Dark Knight", "DARK KNIGHT TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
 
         String movieJson = objectMapper.writeValueAsString(movie);
 
         //when
-        when(movieService.createMovie(movie)).thenReturn(movieMapper.movieToMovieDto(movie));
+        when(movieService.createMovie(movieMapper.movieToMovieDto(movie))).thenReturn(movieMapper.movieToMovieDto(movie));
 
         //then
         mockMvc.perform(post("/movies")
@@ -104,7 +101,7 @@ class MovieControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("The Dark Knight"))
-                .andExpect(jsonPath("$.director").value("Christopher Nolan"));
+                .andExpect(jsonPath("$.producedYear").value(1997));
 
     }
 
@@ -112,9 +109,9 @@ class MovieControllerTest {
     void deleteMovie() throws Exception {
         //given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L, "Frank", "Darabont")), Arrays.asList(new Actor(6L, "Tim", "Robbins"), new Actor(7L, "Morgan", "Freeman"), new Actor(8L, "Bob", "Gunton"), new Actor(9L, "William", "Sandler"), new Actor(10L, "Clancy", "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L, "Francis", "Coppola")), Arrays.asList(new Actor(11L, "Marlon", "Brando"), new Actor(12L, "Al", "Pacino"), new Actor(13L, "James", "Caan"), new Actor(14L, "Richard", "Castellano"), new Actor(15L, "Robert", "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
 
         //when
@@ -130,9 +127,9 @@ class MovieControllerTest {
     void updateMovie() throws Exception {
         //given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L, "Frank", "Darabont")), Arrays.asList(new Actor(6L, "Tim", "Robbins"), new Actor(7L, "Morgan", "Freeman"), new Actor(8L, "Bob", "Gunton"), new Actor(9L, "William", "Sandler"), new Actor(10L, "Clancy", "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L, "Francis", "Coppola")), Arrays.asList(new Actor(11L, "Marlon", "Brando"), new Actor(12L, "Al", "Pacino"), new Actor(13L, "James", "Caan"), new Actor(14L, "Richard", "Castellano"), new Actor(15L, "Robert", "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
 
         //when
@@ -148,9 +145,9 @@ class MovieControllerTest {
                 .description("Batman")
                 .producedYear(1997)
                 .rate(3)
-                .director("James Cameron")
-                .mainActors("Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher")
-                .genre("Horror")
+                .director(List.of(new Director(1L, "James", "Cameron")))
+                .mainActors(Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")))
+                .genres(List.of(new Genre(1L, "Drama")))
                 .build();
         String inputJson = objectMapper.writeValueAsString(updateMovieDto);
 
@@ -168,9 +165,9 @@ class MovieControllerTest {
     void updateFullMovie() throws Exception {
         //given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L, "Frank", "Darabont")), Arrays.asList(new Actor(6L, "Tim", "Robbins"), new Actor(7L, "Morgan", "Freeman"), new Actor(8L, "Bob", "Gunton"), new Actor(9L, "William", "Sandler"), new Actor(10L, "Clancy", "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L, "Francis", "Coppola")), Arrays.asList(new Actor(11L, "Marlon", "Brando"), new Actor(12L, "Al", "Pacino"), new Actor(13L, "James", "Caan"), new Actor(14L, "Richard", "Castellano"), new Actor(15L, "Robert", "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
 
         //when
@@ -178,7 +175,7 @@ class MovieControllerTest {
         UpdateMovieDto updateMovieDto = UpdateMovieDto.builder()
                 .description("Batman")
                 .rate(3)
-                .genre("Horror")
+                .genres(List.of(new Genre(3L, "Crime")))
                 .build();
 
         MovieDto movieDto = MovieDto.builder()
@@ -187,9 +184,9 @@ class MovieControllerTest {
                 .description("Batman")
                 .producedYear(1997)
                 .rate(3)
-                .director("James Cameron")
-                .mainActors("Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher")
-                .genre("Horror")
+                .director(List.of(new Director(1L, "James", "Cameron")))
+                .mainActors(Arrays.asList(new Actor(1L, "Leonardo", "DiCaprio"), new Actor(2L, "Kate", "Winslet"), new Actor(3L, "Billy", "Zane"), new Actor(4L, "Kathy", "Bates"), new Actor(5L, "Frances", "Fisher")))
+                .genres(List.of(new Genre(3L, "Crime")))
                 .build();
         String inputJson = objectMapper.writeValueAsString(updateMovieDto);
 
@@ -200,6 +197,6 @@ class MovieControllerTest {
                         .content(inputJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("Batman"))
-                .andExpect(jsonPath("$.genre").value("Horror"));
+                .andExpect(jsonPath("$.genres[0].name").value("Crime"));
     }
 }

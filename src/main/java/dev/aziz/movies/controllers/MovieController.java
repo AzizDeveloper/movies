@@ -37,8 +37,9 @@ public class MovieController {
     }
 
     @PostMapping("/movies")
-    public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid Movie movie) {
-        return ResponseEntity.created(URI.create("/movies/" + movie.getId())).body(movieService.createMovie(movie));
+    public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid MovieDto movieDto) {
+        return ResponseEntity.created(URI.create("/movies/" + movieDto.getId()))
+                .body(movieService.createMovie(movieDto));
     }
 
     @DeleteMapping("/movies/{id}")

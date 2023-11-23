@@ -3,13 +3,16 @@ package dev.aziz.movies.services;
 import dev.aziz.movies.dtos.MovieDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
 import dev.aziz.movies.dtos.UpdateMovieDto;
+import dev.aziz.movies.entities.Actor;
+import dev.aziz.movies.entities.Director;
+import dev.aziz.movies.entities.Genre;
 import dev.aziz.movies.entities.Movie;
 import dev.aziz.movies.mappers.MovieMapper;
-import dev.aziz.movies.mappers.MovieMapperImpl;
+import dev.aziz.movies.repositories.GenreRepository;
 import dev.aziz.movies.repositories.MovieRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -24,7 +27,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,22 +37,20 @@ class MovieServiceTest {
 
     @Mock
     private MovieRepository movieRepository;
+    @Mock
+    private GenreRepository genreRepository;
 
     @Spy
-    private static MovieMapper movieMapper;
+    private static MovieMapper movieMapper = Mappers.getMapper(MovieMapper.class);
 
-    @BeforeAll
-    public static void setUp() {
-        movieMapper = new MovieMapperImpl();
-    }
 
     @Test
     void getMoviesTest() {
         // given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L,"Frank",  "Darabont")), Arrays.asList(new Actor(6L, "Tim",  "Robbins"), new Actor(7L, "Morgan",  "Freeman"), new Actor(8L, "Bob",  "Gunton"), new Actor(9L, "William",  "Sandler"), new Actor(10L, "Clancy",  "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L,"Francis",  "Coppola")), Arrays.asList(new Actor(11L, "Marlon",  "Brando"), new Actor(12L, "Al",  "Pacino"), new Actor(13L, "James",  "Caan"), new Actor(14L, "Richard",  "Castellano"), new Actor(15L, "Robert",  "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
 
         // when
@@ -68,9 +68,9 @@ class MovieServiceTest {
     void findMovieByIdTest() {
         // given
         List<Movie> movieList = Arrays.asList(
-                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now()),
-                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, "Frank Darabont", "Tim Robbins, Morgan Freeman, Bob Gunton, William Sandler, Clancy Brown", "Drama", Instant.now(), Instant.now()),
-                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, "Francis Ford Coppola", "Marlon Brando, Al Pacino, James Caan, Richard S. Castellano, Robert Duvall", "Crime", Instant.now(), Instant.now())
+                new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(2L, "The Shawshank Redemption", "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", 1994, 4, List.of(new Director(2L,"Frank",  "Darabont")), Arrays.asList(new Actor(6L, "Tim",  "Robbins"), new Actor(7L, "Morgan",  "Freeman"), new Actor(8L, "Bob",  "Gunton"), new Actor(9L, "William",  "Sandler"), new Actor(10L, "Clancy",  "Brown")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now()),
+                new Movie(3L, "The Godfather", "Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger.", 1972, 3, List.of(new Director(3L,"Francis",  "Coppola")), Arrays.asList(new Actor(11L, "Marlon",  "Brando"), new Actor(12L, "Al",  "Pacino"), new Actor(13L, "James",  "Caan"), new Actor(14L, "Richard",  "Castellano"), new Actor(15L, "Robert",  "Duvall")), List.of(new Genre(3L, "Crime")), Instant.now(), Instant.now())
         );
 
         Mockito.when(movieRepository.findMovieById(1L)).thenReturn(Optional.ofNullable(movieList.get(0)));
@@ -83,18 +83,19 @@ class MovieServiceTest {
         assertAll(() -> {
             assertEquals("Titanic", foundMovie.getTitle());
             assertEquals(1997, foundMovie.getProducedYear());
-            assertEquals("James Cameron", foundMovie.getDirector());
+            assertEquals("James", foundMovie.getDirector().get(0).getFirstName());
+            assertEquals("Cameron", foundMovie.getDirector().get(0).getLastName());
         });
     }
 
     @Test
     void createMovieTest() {
         // given
-        Movie movie = new Movie(4L, "The Dark Knight", "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.", 2008, 5, "Christopher Nolan", "Christian Bale, Heat Ledger, Aaron Eckhart, Michael Caine, Cillian Murphy", "Action", Instant.now(), Instant.now());
+        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
 
         Mockito.when(movieRepository.save(movie)).thenReturn(movie);
         // when
-        MovieDto createdMovie = movieService.createMovie(movie);
+        MovieDto createdMovie = movieService.createMovie(movieMapper.movieToMovieDto(movie));
         // then
         verify(movieRepository).save(movie);
         assertAll(() -> {
@@ -107,7 +108,7 @@ class MovieServiceTest {
     void deleteByIdTest() {
         // given
         Long id = 1L;
-        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now());
+        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
 
         Mockito.when(movieRepository.findMovieById(1L)).thenReturn(Optional.of(movie));
         // when
@@ -123,13 +124,13 @@ class MovieServiceTest {
     @Test
     void updateByIdTest() {
         // given
-        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now());
+        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
 
         UpdateMovieDto updateMovieDto1 = UpdateMovieDto
                 .builder()
                 .description("Just movie")
                 .build();
-        Movie updatedMovie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now());
+        Movie updatedMovie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
         updatedMovie.setDescription(updateMovieDto1.getDescription());
 
         Mockito.when(movieRepository.findMovieById(1L)).thenReturn(Optional.of(movie));
@@ -148,21 +149,22 @@ class MovieServiceTest {
     @Test
     void updateFullMovieByIdTest() {
         // given
-        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now());
+        Movie movie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
 
         UpdateMovieDto updateMovieDto1 = UpdateMovieDto
                 .builder()
                 .description("Just movie")
                 .rate(2)
-                .genre("Fantasy")
+                .genres(List.of(new Genre(3L, "Crime")))
                 .build();
-        Movie updatedMovie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, "James Cameron", "Leonardo DiCaprio, Kate Winslet, Billy Zane, Kathy Bates, Frances Fisher", "Drama", Instant.now(), Instant.now());
+        Movie updatedMovie = new Movie(1L, "Titanic", "TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.", 1997, 5, List.of(new Director(1L, "James", "Cameron")), Arrays.asList(new Actor(1L, "Leonardo",  "DiCaprio"), new Actor(2L, "Kate",  "Winslet"), new Actor(3L, "Billy",  "Zane"), new Actor(4L, "Kathy",  "Bates"), new Actor(5L, "Frances",  "Fisher")), List.of(new Genre(1L, "Drama")), Instant.now(), Instant.now());
         updatedMovie.setDescription(updateMovieDto1.getDescription());
         updatedMovie.setRate(updateMovieDto1.getRate());
-        updatedMovie.setGenre(updateMovieDto1.getGenre());
+        updatedMovie.setGenres(updateMovieDto1.getGenres());
 
         Mockito.when(movieRepository.findMovieById(1L)).thenReturn(Optional.of(movie));
         Mockito.when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
+        Mockito.when(genreRepository.findGenreByName("Crime")).thenReturn(Optional.of(new Genre(3L, "Crime")));
 
         //when
         MovieDto movieDto1 = movieService.updateById(1L, updateMovieDto1);
@@ -174,7 +176,7 @@ class MovieServiceTest {
         assertAll(() -> {
             assertEquals("Just movie", movieDto1.getDescription());
             assertEquals(2, movieDto1.getRate());
-            assertEquals("Fantasy", movieDto1.getGenre());
+            assertEquals("Crime", movieDto1.getGenres().get(0).getName());
         });
     }
 }
