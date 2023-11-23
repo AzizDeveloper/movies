@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
-        private final MovieMapper movieMapper;
+    private final MovieMapper movieMapper;
 
     public List<ReducedMovieDto> getMovies() {
         List<ReducedMovieDto> reducedMovieDtos = movieMapper.moviesToReducedMovieDtos(movieRepository.findAll());
@@ -67,21 +67,16 @@ public class MovieService {
         }
 
         if (updateMovieDto.getGenres() != null) {
-            List<Genre> genreList = new ArrayList<>();
-            for (int i = 0; i < updateMovieDto.getGenres().size(); i++) {
-                Genre genre = updateMovieDto.getGenres().get(i);
+            List<Genre> genreList = updateMovieDto.getGenres().stream()
+                    .peek(genre -> {
+                        if ("".equals(genre.getName())) {
+                            throw new AppException("Genres should not be empty", HttpStatus.BAD_REQUEST);
+                        }
+                    })
+                    .map(genre -> genreRepository.findGenreByName(genre.getName())
+                            .orElseGet(() -> genreRepository.save(genre)))
+                    .collect(Collectors.toList());
 
-                if ("".equals(genre.getName())) {
-                    throw new AppException("Genres should not be empty", HttpStatus.BAD_REQUEST);
-                }
-                if (genreRepository.findGenreByName(genre.getName()).isPresent()) {
-                    Genre foundGenre = genreRepository.findGenreByName(genre.getName()).get();
-                    genreList.add(foundGenre);
-                } else {
-                    Genre savedGenre = genreRepository.save(genre);
-                    genreList.add(savedGenre);
-                }
-            }
             movieById.setGenres(genreList);
         }
         return movieMapper.movieToMovieDto(movieRepository.save(movieMapper.movieDtoToMovie(movieById)));
@@ -89,17 +84,10 @@ public class MovieService {
 
     public MovieDto updateFullMovieById(Long id, UpdateMovieDto updateMovieDto) {
         MovieDto movieById = findMovieById(id);
-        List<Genre> genreList = new ArrayList<>();
-        for (int i = 0; i < updateMovieDto.getGenres().size(); i++) {
-            Genre genre = updateMovieDto.getGenres().get(i);
-            if (genreRepository.findGenreByName(genre.getName()).isPresent()) {
-                Genre foundGenre = genreRepository.findGenreByName(genre.getName()).get();
-                genreList.add(foundGenre);
-            } else {
-                Genre savedGenre = genreRepository.save(genre);
-                genreList.add(savedGenre);
-            }
-        }
+        List<Genre> genreList = updateMovieDto.getGenres().stream()
+                .map(genre -> genreRepository.findGenreByName(genre.getName())
+                        .orElseGet(() -> genreRepository.save(genre)))
+                .collect(Collectors.toList());
         movieById.setGenres(genreList);
         movieById.setDescription(updateMovieDto.getDescription());
         movieById.setRate(updateMovieDto.getRate());
