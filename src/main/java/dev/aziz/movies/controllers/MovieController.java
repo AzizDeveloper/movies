@@ -1,12 +1,14 @@
 package dev.aziz.movies.controllers;
 
 import dev.aziz.movies.dtos.MovieDto;
+import dev.aziz.movies.dtos.SearchDto;
 import dev.aziz.movies.dtos.ReducedMovieDto;
 import dev.aziz.movies.dtos.UpdateMovieDto;
-import dev.aziz.movies.entities.Movie;
 import dev.aziz.movies.services.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -55,5 +58,11 @@ public class MovieController {
     @PutMapping("/movies/{id}")
     public ResponseEntity<MovieDto> updateFullMovie(@PathVariable Long id, @RequestBody @Valid UpdateMovieDto updateMovieDto) {
         return ResponseEntity.ok(movieService.updateFullMovieById(id, updateMovieDto));
+    }
+
+    @PostMapping("/movies/search")
+    public ResponseEntity<Page<String>> searchMoviesWithThePerson(@RequestParam int page, @RequestParam int size, @RequestBody SearchDto searchDto) {
+        PageRequest pr = PageRequest.of(page, size);
+        return ResponseEntity.ok(movieService.searchMoviesWithThePerson(searchDto.getName(), pr));
     }
 }

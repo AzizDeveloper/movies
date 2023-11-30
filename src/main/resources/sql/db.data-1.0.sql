@@ -32,4 +32,18 @@ INSERT INTO movie_directors (director_id, movie_id) VALUES (1, 1), (2, 2), (3, 3
 
 INSERT INTO movie_genre (genre_id, movie_id) VALUES (1, 1), (1, 2), (3, 3);
 
-INSERT INTO movie_main_actors (actor_id, movie_id) VALUES (1, 1), (2, 1), (6, 2), (7, 2), (11, 3), (12, 3);
+INSERT INTO movie_main_actors (actor_id, movie_id) VALUES (1, 1),
+                                                          (2, 1),
+                                                          (3, 1),
+                                                          (4, 1),
+                                                          (5, 1),
+                                                          (6, 2),
+                                                          (7, 2),
+                                                          (8, 2),
+                                                          (9, 2),
+                                                          (10, 2),
+                                                          (11, 3),
+                                                          (12, 3),
+                                                          (13, 3),
+                                                          (14, 3),
+                                                          (15, 3);
