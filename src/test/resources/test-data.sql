@@ -21,7 +21,7 @@ INSERT INTO Genre (id, name) VALUES (1, 'Drama'), (2, 'Romance'), (3, 'Crime');
 
 
 INSERT INTO movie (id, title, description, produced_year, rate, created_date, last_modified_date) VALUES
-    (1, 'Titanic', 'TEST A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.', 1997, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (1, 'Titanic', 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.', 1997, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (2, 'The Shawshank Redemption', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 1994, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (3, 'The Godfather', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 1972, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 

@@ -1,8 +1,5 @@
 package dev.aziz.movies.dtos;
 
-import dev.aziz.movies.entities.Actor;
-import dev.aziz.movies.entities.Director;
-import dev.aziz.movies.entities.Genre;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -42,16 +39,13 @@ public class MovieDto {
     @Max(value = 5, message = "Rate should not be empty and must be between 1 and 5")
     private int rate;
 
-    @NotEmpty(message = "Director should not be empty")
-    private List<Director> director;
+    private List<PersonDto> directorDtos;
 
 
-    @NotEmpty(message = "Main actors list should not be empty")
-    private List<Actor> mainActors;
+    private List<PersonDto> actorDtos;
 
 
-    @NotEmpty(message = "Genre should not be empty")
-    private List<Genre> genres;
+    private List<GenreDto> genreDtos;
 
     @CreatedDate
     private Instant createdDate;
