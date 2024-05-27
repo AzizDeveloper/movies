@@ -86,7 +86,9 @@ public class MovieController {
             summary = "Search movies with Person played in those movies."
     )
     @PostMapping("/movies/search")
-    public ResponseEntity<Page<String>> searchMoviesWithThePerson(@RequestParam int page, @RequestParam int size, @RequestBody SearchDto searchDto) {
+    public ResponseEntity<Page<String>> searchMoviesWithThePerson(@RequestParam int page,
+                                                                  @RequestParam int size,
+                                                                  @RequestBody SearchDto searchDto) {
         PageRequest pr = PageRequest.of(page, size);
         return ResponseEntity.ok(movieService.searchMoviesWithThePerson(searchDto.getName(), pr));
     }
